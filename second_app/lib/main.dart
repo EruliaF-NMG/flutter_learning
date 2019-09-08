@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './widgets/NewTransactions.dart';
 import './widgets/TransacrionList.dart';
+import './widgets/Chart.dart';
 import './models/Transactions.dart';
 
 void main() => runApp(MyApp());
@@ -10,7 +11,30 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter App',
+      title: 'Personal Expenses',
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        accentColor: Colors.amber,
+        fontFamily: "Quicksand",
+        //errorColor: Colors.red,
+        textTheme: ThemeData.light().textTheme.copyWith(
+              title: TextStyle(
+                  fontFamily: "OpenSans",
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+              button: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+        appBarTheme: AppBarTheme(
+          textTheme: ThemeData.light().textTheme.copyWith(
+                title: TextStyle(
+                    fontFamily: "OpenSans",
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+        ),
+      ),
       home: MyHomePage(),
     );
   }
@@ -25,16 +49,30 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Transactions> transactions = [
-    Transactions('t6', "Test-1", 200, DateTime.now()),
-    Transactions('t7', "Test-2", 300, DateTime.now()),
+    // Transactions('t6', "Test-1", 200, DateTime.now()),
+    // Transactions('t7', "Test-2", 300, DateTime.now()),
   ];
 
-  void _onAddnew(String tital, double amount) {
+  List<Transactions> get _resentDates {
+    return transactions.where((tx) {
+      return tx.date.isAfter(DateTime.now().subtract(Duration(
+        days: 7,
+      )));
+    }).toList();
+  }
+
+  void _onAddnew(String tital, double amount, DateTime selectedDay) {
     final tran =
-        Transactions(DateTime.now().toString(), tital, amount, DateTime.now());
-        setState(() {
-          transactions.add(tran);
-        });
+        Transactions(DateTime.now().toString(), tital, amount, selectedDay);
+    setState(() {
+      transactions.add(tran);
+    });
+  }
+
+  void _removeItem(String id) {
+    setState(() {
+      transactions.removeWhere((tx) => tx.id == id);
+    });
   }
 
   void _showNewTransaction(BuildContext context) {
@@ -42,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
         context: context,
         builder: (modelContext) {
           return GestureDetector(
-            onTap: (){},
+            onTap: () {},
             child: NewTransactions(_onAddnew),
             behavior: HitTestBehavior.opaque,
           );
@@ -51,29 +89,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = AppBar(
+      title: Text('Personal Expenses'),
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () => _showNewTransaction(context),
+        )
+      ],
+    );
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter App'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _showNewTransaction(context),
-          )
-        ],
-      ),
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Container(
-              width: double.infinity,
-              child: Card(
-                elevation: 5,
-                color: Colors.blue,
-                child: Text('Chart'),
-              ),
+              height: ((MediaQuery.of(context).size.height) -
+                      appBar.preferredSize.height -
+                      MediaQuery.of(context).padding.top) *
+                  0.3,
+              child: Chart(_resentDates),
             ),
-            TransacrionList(transactions),
+            Container(
+              height: ((MediaQuery.of(context).size.height) -
+                      appBar.preferredSize.height -
+                      MediaQuery.of(context).padding.top) *
+                  0.7,
+              child: TransacrionList(transactions, _removeItem),
+            ),
           ],
         ),
       ),
