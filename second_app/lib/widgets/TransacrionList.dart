@@ -11,7 +11,8 @@ class TransacrionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return transactions.isEmpty
-          ? Column(
+          ? LayoutBuilder(builder: (cxt,constraints){
+            return Column(
               children: <Widget>[
                 Text(
                   "No Data",
@@ -21,14 +22,15 @@ class TransacrionList extends StatelessWidget {
                   height: 10,
                 ),
                 Container(
-                  height: 200,
+                  height: constraints.maxHeight * 0.6,
                   child: Image.asset(
                     "assets/images/waiting.png",
                     fit: BoxFit.cover,
                   ),
                 )
               ],
-            )
+            );
+          },)
           : ListView.builder(
               itemBuilder: (buildContext, index) {
                 return Card(

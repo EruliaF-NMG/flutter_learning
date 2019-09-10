@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import './widgets/NewTransactions.dart';
 import './widgets/TransacrionList.dart';
 import './widgets/Chart.dart';
 import './models/Transactions.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  //desable portait
+  // SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.portraitUp,
+  //   DeviceOrientation.portraitUp
+  // ]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -53,6 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // Transactions('t7', "Test-2", 300, DateTime.now()),
   ];
 
+  bool showChart = false;
+
   List<Transactions> get _resentDates {
     return transactions.where((tx) {
       return tx.date.isAfter(DateTime.now().subtract(Duration(
@@ -89,6 +99,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isLandScape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
     final appBar = AppBar(
       title: Text('Personal Expenses'),
       actions: <Widget>[
@@ -99,26 +112,53 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
 
+    final trxList = Container(
+      height: ((MediaQuery.of(context).size.height) -
+              appBar.preferredSize.height -
+              MediaQuery.of(context).padding.top) *
+          0.7,
+      child: TransacrionList(transactions, _removeItem),
+    );
+
     return Scaffold(
       appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
-              height: ((MediaQuery.of(context).size.height) -
-                      appBar.preferredSize.height -
-                      MediaQuery.of(context).padding.top) *
-                  0.3,
-              child: Chart(_resentDates),
-            ),
-            Container(
-              height: ((MediaQuery.of(context).size.height) -
-                      appBar.preferredSize.height -
-                      MediaQuery.of(context).padding.top) *
-                  0.7,
-              child: TransacrionList(transactions, _removeItem),
-            ),
+            if (isLandScape)
+              Row(
+                children: <Widget>[
+                  Text("Show Chart"),
+                  Switch(
+                    value: showChart,
+                    onChanged: (value) {
+                      setState(() {
+                        showChart = value;
+                      });
+                    },
+                  )
+                ],
+              ),
+            if (!isLandScape)
+              Container(
+                height: ((MediaQuery.of(context).size.height) -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.3,
+                child: Chart(_resentDates),
+              ),
+            if (!isLandScape) trxList,
+            if (isLandScape)
+              (showChart)
+                  ? Container(
+                      height: ((MediaQuery.of(context).size.height) -
+                              appBar.preferredSize.height -
+                              MediaQuery.of(context).padding.top) *
+                          0.7,
+                      child: Chart(_resentDates),
+                    )
+                  : trxList,
           ],
         ),
       ),
