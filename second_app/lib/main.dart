@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import './widgets/NewTransactions.dart';
 import './widgets/TransacrionList.dart';
 import './widgets/Chart.dart';
@@ -99,8 +102,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLandScape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    final mediaQuery = MediaQuery.of(context);
+
+    final isLandScape = mediaQuery.orientation == Orientation.landscape;
 
     final appBar = AppBar(
       title: Text('Personal Expenses'),
@@ -113,9 +117,9 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     final trxList = Container(
-      height: ((MediaQuery.of(context).size.height) -
+      height: ((mediaQuery.size.height) -
               appBar.preferredSize.height -
-              MediaQuery.of(context).padding.top) *
+              mediaQuery.padding.top) *
           0.7,
       child: TransacrionList(transactions, _removeItem),
     );
@@ -130,7 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
               Row(
                 children: <Widget>[
                   Text("Show Chart"),
-                  Switch(
+                  Switch.adaptive(
+                    activeColor: Theme.of(context).accentColor,
                     value: showChart,
                     onChanged: (value) {
                       setState(() {
@@ -142,9 +147,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             if (!isLandScape)
               Container(
-                height: ((MediaQuery.of(context).size.height) -
+                height: ((mediaQuery.size.height) -
                         appBar.preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
+                        mediaQuery.padding.top) *
                     0.3,
                 child: Chart(_resentDates),
               ),
@@ -152,9 +157,9 @@ class _MyHomePageState extends State<MyHomePage> {
             if (isLandScape)
               (showChart)
                   ? Container(
-                      height: ((MediaQuery.of(context).size.height) -
+                      height: ((mediaQuery.size.height) -
                               appBar.preferredSize.height -
-                              MediaQuery.of(context).padding.top) *
+                              mediaQuery.padding.top) *
                           0.7,
                       child: Chart(_resentDates),
                     )
@@ -163,10 +168,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => _showNewTransaction(context),
-      ),
+      floatingActionButton: Platform.isIOS
+          ? Container()
+          : FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () => _showNewTransaction(context),
+            ),
     );
   }
 }

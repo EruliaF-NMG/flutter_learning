@@ -29,7 +29,7 @@ class _UserTransactionsState extends State<UserTransactions> {
     return Column(
       children: <Widget>[
         NewTransactions(_onAddnew),
-        TransacrionList(transactions),
+        //TransacrionList(transactions),
       ],
     );
   }
